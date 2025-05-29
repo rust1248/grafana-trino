@@ -132,6 +132,20 @@ func macroDateFilter(query *sqlds.Query, args []string) (string, error) {
 	return fmt.Sprintf("%s BETWEEN date '%s' AND date '%s'", column, from, to), nil
 }
 
+func macroDtFilter(query *sqlds.Query, args []string) (string, error) {
+	if len(args) != 1 {
+		return "", errors.WithMessagef(sqlds.ErrorBadArgumentCount, "expected 1 argument, received %d", len(args))
+	}
+
+	var (
+		column = args[0]
+		from   = query.TimeRange.From.UTC().Format("20060102")
+		to     = query.TimeRange.To.UTC().Format("20060102")
+	)
+
+	return fmt.Sprintf("%s BETWEEN '%s' AND '%s'", column, from, to), nil
+}
+
 var macros = map[string]sqlds.MacroFunc{
 	"dateFilter":      macroDateFilter,
 	"parseTime":       macroParseTime,
@@ -141,6 +155,7 @@ var macros = map[string]sqlds.MacroFunc{
 	"timeGroup":       macroTimeGroup,
 	"unixEpochGroup":  macroUnixEpochGroup,
 	"timeTo":          macroTimeTo,
+	"dtFilter":        macroDtFilter,
 }
 
 func (s *TrinoDatasource) Macros() sqlds.Macros {
